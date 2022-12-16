@@ -19,12 +19,12 @@ using namespace std;
 int sprite[] = { 0,0,0,1,0,1,0,0,1,1,1,1,1,0,1,0,1,1,1,0,0,0,1,1,1,1,0,0,0,0,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0 };
 int colorList[] = { 0x11,0x66,0xDD };
 
-
+Screen* Screen::instance{ nullptr };
 
 int main()
 {
 	srand(time(NULL));
-	Screen scr;
+	Screen *scr = Screen::getInstance();
 	vector <Block*> blocks;
 	vector <Tank*> tanks;
 	int state = -1;
@@ -33,7 +33,7 @@ int main()
 
 	while (state == -1)
 	{
-		state = scr.drawMenu();
+		state = scr->drawMenu();
 	}
 	if (state == 3)return 0;
 
@@ -59,10 +59,10 @@ int main()
 					blocks.push_back(new Eagle(ii, i));
 					break;
 				case 11: //playerSpawn
-					tanks.push_back(new Player(ii, i, &scr));
+					tanks.push_back(new Player(ii, i, scr));
 					break;
 				case 12: //botSpawn
-					tanks.push_back(new Bot(ii, i, &scr));
+					tanks.push_back(new Bot(ii, i, scr));
 					break;
 				}
 			}
@@ -75,24 +75,24 @@ int main()
 
 		if (blockBroken)
 		{
-			scr.clear();
-			scr.drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
+			scr->clear();
+			scr->drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
 			for (auto block : blocks)
 			{
-				if (block->get_spriteSize() == 7) scr.drawSprite7x7(20 + block->get_x() * 7, 20 + block->get_y() * 7, block->get_sprite());
-				else scr.drawSprite14x14(20 + block->get_x() * 7, 20 + block->get_y() * 7, block->get_sprite());
+				if (block->get_spriteSize() == 7) scr->drawSprite7x7(20 + block->get_x() * 7, 20 + block->get_y() * 7, block->get_sprite());
+				else scr->drawSprite14x14(20 + block->get_x() * 7, 20 + block->get_y() * 7, block->get_sprite());
 			}
-			scr.updateCache();
+			scr->updateCache();
 			blockBroken = false;
 		}
 		else
 		{
-			scr.recallCache();
+			scr->recallCache();
 		}
 		for (auto tank : tanks)
 		{
-			tank->action();
-			scr.drawSprite14x14(20 + tank->get_x() * 7 + tank->get_subX(), 20 + tank->get_y() * 7 + tank->get_subY(), tank->get_sprite());
+			scr->drawSprite14x14(20 + tank->get_x() * 7 + tank->get_subX(), 20 + tank->get_y() * 7 + tank->get_subY(), tank->get_sprite());
+
 			/*if (tank->get_bullet() != NULL) {
 				tank->get_bullet()->action();
 				scr.drawBullet(25 + tank->get_bullet()->get_subX() + tank->get_bullet()->get_x() * 7, 25 + tank->get_bullet()->get_subY() + tank->get_bullet()->get_y() * 7, tank->get_bullet()->get_sprite());
@@ -102,6 +102,8 @@ int main()
 		}
 		for (auto tank : tanks)
 		{
+			tank->action();
+
 			if (tank->get_bullet() != NULL) {
 				if (tank->get_bullet()->action())
 				{
@@ -152,26 +154,35 @@ int main()
 							(*it)->get_x1True() >= tank->get_bullet()->get_x() &&
 							(*it)->get_yTrue() <= tank->get_bullet()->get_y() &&
 							(*it)->get_y1True() >= tank->get_bullet()->get_y()) {
-							if ((*it)->get_lives() > 0)(*it)->kill();
-							else it = tanks.erase(it);
+							(*it)->kill(); 
 							continue;
 						}
+							
 						if ((*it)->get_xTrue() <= tank->get_bullet()->get_x1() &&
 							(*it)->get_x1True() >= tank->get_bullet()->get_x1() &&
 							(*it)->get_yTrue() <= tank->get_bullet()->get_y1() &&
 							(*it)->get_y1True() >= tank->get_bullet()->get_y1()) {
-							if ((*it)->get_lives() > 0)(*it)->kill();
-							else it = tanks.erase(it);
+							(*it)->kill();
 							continue;
 						}
 					}
 
 					tank->destroy_bullet();
 				}
-				else scr.drawBullet(25 + tank->get_bullet()->get_subX() + tank->get_bullet()->get_x() * 7, 25 + tank->get_bullet()->get_subY() + tank->get_bullet()->get_y() * 7, tank->get_bullet()->get_sprite());
+				else scr->drawBullet(25 + tank->get_bullet()->get_subX() + tank->get_bullet()->get_x() * 7, 25 + tank->get_bullet()->get_subY() + tank->get_bullet()->get_y() * 7, tank->get_bullet()->get_sprite());
 
 			}
 		}
+
+
+		for (auto it = tanks.begin(); it != tanks.end(); it++)
+		{
+			if ((*it)->get_lives() < 0) {
+				tanks.erase(it);
+				break;
+			}
+		}
+
 
 		int count = 0;
 		int lives = 0;
@@ -180,34 +191,34 @@ int main()
 			if (tank->isBot())count += tank->get_lives() + 1;
 			if (!tank->isBot())lives = tank->get_lives() + 1;
 		}
-		scr.drawString("ENEMIES", 222, 50, 0xFF, 0, 0);
-		scr.drawString(to_string(count), 222, 60, 0xFF, 0, 0);
-		scr.drawString("LIVES", 222, 150, 0xFF, 0, 0);
-		scr.drawString(to_string(lives), 222, 160, 0xFF, 0, 0);
+		scr->drawString("ENEMIES", 222, 50, 0xFF, 0, 0);
+		scr->drawString(to_string(count), 222, 60, 0xFF, 0, 0);
+		scr->drawString("LIVES", 222, 150, 0xFF, 0, 0);
+		scr->drawString(to_string(lives), 222, 160, 0xFF, 0, 0);
 
 
-		scr.draw();
+		scr->draw();
 		if (count == 0) {
-			scr.clear();
-			scr.drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
-			scr.drawString("YOU WIN", 88, 110, 0xFF, 0, 0);
-			scr.draw();
+			scr->clear();
+			scr->drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
+			scr->drawString("YOU WIN", 88, 110, 0xFF, 0, 0);
+			scr->draw();
 			break;
 		}
 		if (lives == 0)
 		{
-			scr.clear();
-			scr.drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
-			scr.drawString("YOU LOSE", 82, 110, 0xFF, 0, 0);
-			scr.draw();
+			scr->clear();
+			scr->drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
+			scr->drawString("YOU LOSE", 82, 110, 0xFF, 0, 0);
+			scr->draw();
 			break;
 		}
 		if (eagleDestroyed)
 		{
-			scr.clear();
-			scr.drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
-			scr.drawString("YOU LOSE", 82, 110, 0xFF, 0, 0);
-			scr.draw();
+			scr->clear();
+			scr->drawRect(19, 202, 19, 202, 0xFF, 0xFF, false);
+			scr->drawString("YOU LOSE", 82, 110, 0xFF, 0, 0);
+			scr->draw();
 			break;
 		}
 	}
