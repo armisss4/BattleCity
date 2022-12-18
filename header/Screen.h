@@ -23,6 +23,13 @@ class Screen
 {
 public:
 
+    Screen(Screen& other) = delete;
+    void operator=(const Screen&) = delete;
+
+    static Screen* getInstance();
+
+
+
     void clear();
     void updateCache();
     void recallCache();
@@ -47,11 +54,16 @@ public:
 
     HWND get_consoleWindow() { return consoleWindow; };
 
-    Screen();
+    
 
 protected:
 
+    Screen();
+
 private:
+    static Screen* instance;
+
+
     void drawLetter5x5(int letter, int x, int y, int color, bool highVisibility);
     void drawLine(int x1, int x2, int y1, int y2, int color, int pixel);
 
