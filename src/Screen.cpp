@@ -385,3 +385,13 @@ void Screen::drawRect(int x1, int x2, int y1, int y2, int color, int fill, bool 
 	drawLine(x1, x2, y2, y2, color, pixel_full);
 	if (drawFill)fillShape(x1 + 1, y1 + 1, fill, pixel_full);
 }
+
+Screen *Screen::getInstance()
+{
+	if (instance == nullptr)
+	{
+		instance = new Screen();
+	}
+	return instance;
+}
+

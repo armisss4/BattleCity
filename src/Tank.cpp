@@ -2,13 +2,13 @@
 #include <algorithm>
 #include <iterator>
 
-void Tank::set_color(int color)
+/*void Tank::set_color(int color)
 {
 	for (int i = 0; i < 196; i++)
 	{
 		if (sprite[i] == -1)sprite[i] = color;
 	}
-}
+}*/
 
 int Tank::get_xTrue()
 {
@@ -71,6 +71,7 @@ void Tank::rotate(int dir)
 
 }
 
+
 void Tank::fire()
 {
 	
@@ -82,13 +83,14 @@ void Tank::fire()
 	bullet->action();
 }
 
+
 bool Tank::getCollision()
 {
 	if (scr->isNotBlank(x, y, currentRotation))return true;
 	return false;
 }
 
-void Tank::rotate()
+/*void Tank::rotate()
 {
 
 	int temp[196];
@@ -105,3 +107,4 @@ void Tank::rotate()
 
 
 }
+*/
