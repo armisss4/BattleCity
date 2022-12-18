@@ -22,6 +22,31 @@ public:
 	void kill();
 	bool isBot() { return bot; }
 	virtual void action() {};
+	void set_color(int color)
+	{
+		for (int i = 0; i < 196; i++)
+		{
+			if (sprite[i] == -1)sprite[i] = color;
+		}
+	}
+
+	void rotate()
+	{
+
+		int temp[196];
+		copy(sprite, sprite + 196, temp);
+
+		for (int i = 0; i < 14; i++)
+		{
+			for (int ii = 0; ii < 14; ii++)
+			{
+				sprite[i + ii * 14] = temp[(13 - ii) + i * 14];
+			}
+
+		}
+
+
+	}
 
 
 protected:
@@ -29,7 +54,6 @@ protected:
 	void rotate(int dir);
 	void fire();
 	bool getCollision();
-	void set_color(int color);
 	int x, y;
 	int respawnX, respawnY;
 	bool moving = false;
@@ -42,7 +66,7 @@ protected:
 private:
 	
 	int currentRotation = 0;
-	void rotate();
+	//void rotate();
 	int sprite[196] =
 	{
 		000,000,000,000,000,000,136,136,000,000,000,000,000,000,
